@@ -1,0 +1,1101 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="감정을 안전하게 내려놓는 SEL 수업 활동 — 친구는 내 감정쓰레기통이 아니에요. Lev Lab.">
+<title>감정, 안전하게 내려놓기 — Lev Lab</title>
+<style>
+  :root{
+    --paper: #EDF1EA;
+    --paper-deep: #E1E8DC;
+    --card: #FBFAF6;
+    --ink: #223226;
+    --ink-soft: #56645A;
+    --accent-light: #7BC67E;
+    --accent-deep: #2D6B4A;
+    --caution: #C97B5A;
+    --caution-bg: #F6E9E2;
+    --kraft: #A78A6D;
+    --ring: rgba(45,107,74,0.35);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+
+  body{
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(16px, 4vw, 40px);
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(123,198,126,0.10), transparent 60%),
+      radial-gradient(900px 500px at 110% 110%, rgba(45,107,74,0.08), transparent 55%),
+      var(--paper);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+    color: var(--ink);
+    overflow-x: hidden;
+  }
+
+  .wrap{ width: 100%; max-width: 560px; position: relative; }
+
+  .stage{
+    background: var(--card);
+    border-radius: 22px;
+    padding: clamp(22px, 5vw, 40px);
+    box-shadow: 0 1px 2px rgba(34,50,38,0.04), 0 18px 40px -20px rgba(34,50,38,0.25);
+    border: 1px solid rgba(34,50,38,0.06);
+  }
+  .stage.hidden{ display: none; }
+  .subview.hidden{ display: none; }
+
+  /* ---------- mark / headers ---------- */
+  .mark{ display:flex; justify-content:center; margin-bottom: 16px; }
+  .mark svg{ width: 38px; height: 34px; }
+
+  .eyebrow{
+    text-align:center; font-size: 12px; letter-spacing: 0.14em;
+    color: var(--ink-soft); margin: 0 0 6px; text-transform: uppercase;
+  }
+
+  h1{
+    text-align:center; font-size: clamp(20px, 4vw, 25px); font-weight: 800;
+    letter-spacing: -0.01em; color: var(--accent-deep); margin: 0 0 18px; line-height: 1.35;
+  }
+
+  .caution{
+    background: var(--caution-bg); border-left: 4px solid var(--caution);
+    border-radius: 10px; padding: 15px 17px; margin-bottom: 22px;
+  }
+  .caution p{ margin: 0; font-size: 15px; line-height: 1.65; color: var(--ink); }
+  .caution p + p{ margin-top: 8px; }
+  .caution strong{ color: var(--caution); font-weight: 700; }
+
+  .lead{ text-align:center; font-size: 15px; line-height: 1.7; color: var(--ink-soft); margin: 0 0 22px; }
+
+  /* ---------- class code ---------- */
+  .code-row{ display:flex; gap:10px; justify-content:center; align-items:center; margin: 0 0 8px; }
+  .code-row label{ font-size: 13px; color: var(--ink-soft); font-weight: 600; }
+  .code-input{
+    width: 130px; text-align:center; padding: 10px 12px; border-radius: 12px;
+    border: 1.5px solid rgba(45,107,74,0.25); background: var(--card);
+    font-family: inherit; font-size: 16px; font-weight: 800; letter-spacing: 0.16em;
+    color: var(--accent-deep); text-transform: uppercase; outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .code-input::placeholder{ font-weight: 500; letter-spacing: 0; font-size: 13px; color: rgba(34,50,38,0.35); }
+  .code-input:focus{ border-color: var(--accent-deep); box-shadow: 0 0 0 3px var(--ring); }
+  .code-hint{ text-align:center; font-size: 12px; color: var(--ink-soft); margin: 0 0 20px; line-height: 1.5; min-height: 15px; }
+  .code-hint.warn{ color: var(--caution); font-weight: 600; }
+  .code-input.shake-x{ animation: shakeX .35s ease; }
+  @keyframes shakeX{
+    0%,100%{ transform: translateX(0); } 25%{ transform: translateX(-6px); } 75%{ transform: translateX(6px); }
+  }
+
+  /* ---------- progress dots ---------- */
+  .progress-dots{ display:flex; justify-content:center; gap:6px; margin-bottom: 18px; }
+  .dot{ width:6px; height:6px; border-radius:50%; background: rgba(45,107,74,0.18); transition: all .2s ease; }
+  .dot.active{ background: var(--accent-deep); width:16px; border-radius:4px; }
+  .dot.done{ background: var(--accent-light); }
+
+  .round-tag{ text-align:center; font-size:12px; color: var(--ink-soft); margin: 0 0 4px; font-weight:600; }
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:block; width: 100%; border: none; border-radius: 14px; padding: 15px 20px;
+    font-size: 16px; font-weight: 700; font-family: inherit; cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  }
+  .btn:focus-visible{ outline: 3px solid var(--ring); outline-offset: 2px; }
+  .btn:active{ transform: translateY(1px); }
+  .btn-primary{ background: var(--accent-light); color: var(--ink); box-shadow: 0 10px 24px -10px rgba(123,198,126,0.65); }
+  .btn-primary:hover{ transform: translateY(-1px); }
+  .btn-primary:disabled{ opacity: 0.4; cursor: not-allowed; box-shadow: none; transform: none; }
+  .btn-secondary{
+    background: var(--card); color: var(--accent-deep); border: 1.5px solid rgba(45,107,74,0.3);
+    font-size:15px; padding:13px 18px; margin-top:10px;
+  }
+  .btn-ghost{ background: transparent; color: var(--ink-soft); font-weight: 600; font-size: 14px; padding: 10px; margin-top: 8px; }
+  .btn-ghost:hover{ color: var(--ink); }
+  .btn-row{ display:flex; gap:10px; }
+  .btn-row .btn{ margin-top:0; }
+  .btn-quiet-wrap{ display:flex; justify-content:center; }
+
+  /* ---------- chips ---------- */
+  .chip-row{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom: 20px; }
+  .chip{
+    padding:9px 15px; border-radius:999px; border:1.5px solid rgba(45,107,74,0.22);
+    background:var(--card); font-size:14px; font-weight:600; color:var(--ink);
+    cursor:pointer; transition: all .15s ease; font-family:inherit;
+  }
+  .chip:hover{ border-color:var(--accent-deep); }
+  .chip.selected{ background:var(--accent-light); border-color:var(--accent-deep); }
+  .chip:focus-visible{ outline:3px solid var(--ring); outline-offset:2px; }
+
+  /* ---------- slider ---------- */
+  .slider-block{ margin-bottom: 20px; }
+  .slider-label{ display:flex; justify-content:space-between; align-items:baseline; font-size: 14px; color: var(--ink-soft); margin-bottom: 10px; }
+  .slider-value{ font-weight:800; color: var(--accent-deep); font-size: 17px; }
+  input[type=range]{ width: 100%; accent-color: var(--accent-deep); height: 22px; }
+
+  /* ---------- note / bin ---------- */
+  .prompt{ text-align:center; font-size: 16.5px; font-weight: 700; color: var(--ink); margin: 0 0 4px; }
+  .prompt-sub{ text-align:center; font-size: 12.5px; color: var(--ink-soft); margin: 0 0 16px; }
+
+  .note-zone{ position: relative; min-height: 110px; margin-bottom: 16px; }
+  .note{
+    position: relative; width: 100%; min-height: 110px; background: var(--paper-deep);
+    border: 1px solid rgba(34,50,38,0.08); border-radius: 4px 12px 12px 4px;
+    box-shadow: 3px 4px 0 rgba(167,138,109,0.18); padding: 14px;
+    transform: rotate(-0.6deg); transition: transform .2s ease;
+  }
+  .note:focus-within{ transform: rotate(0deg); }
+  .note textarea{
+    width: 100%; height: 78px; resize: none; border: none; background: transparent; outline: none;
+    font-family: inherit; font-size: 15px; line-height: 1.6; color: var(--ink);
+  }
+  .note textarea::placeholder{ color: rgba(34,50,38,0.38); }
+
+  .note.crumple{ animation: crumple .38s ease-in forwards; }
+  .note.toss{ animation: toss .55s cubic-bezier(.5,-0.3,.7,.4) forwards; }
+  @keyframes crumple{
+    0%{ transform: rotate(-0.6deg) scale(1); }
+    40%{ transform: rotate(4deg) scale(0.86,0.9) skew(-3deg); }
+    100%{ transform: rotate(-8deg) scale(0.32,0.3) skew(6deg); border-radius: 50%; }
+  }
+  @keyframes toss{
+    0%{ transform: rotate(-8deg) scale(0.32,0.3) skew(6deg); opacity: 1; }
+    70%{ opacity: 1; }
+    100%{ transform: translate(var(--tx,0px), var(--ty,-40px)) rotate(180deg) scale(0.12); opacity: 0; }
+  }
+  .note.hide{ visibility: hidden; }
+  .shake{ animation: shake .35s ease; }
+  @keyframes shake{
+    0%,100%{ transform: rotate(-0.6deg) translateX(0); }
+    25%{ transform: rotate(-0.6deg) translateX(-6px); }
+    75%{ transform: rotate(-0.6deg) translateX(6px); }
+  }
+
+  /* ---------- private check ---------- */
+  .private-check{ text-align:center; margin: 2px 0 18px; }
+  .private-check p{ font-size:13.5px; color:var(--ink-soft); margin:0 0 10px; line-height:1.5; }
+  .private-btns{ display:flex; gap:10px; justify-content:center; }
+  .private-btn{
+    flex:1; max-width:150px; padding:11px; border-radius:12px; border:1.5px solid rgba(45,107,74,0.22);
+    background:var(--card); font-family:inherit; font-size:14px; font-weight:700; color:var(--ink); cursor:pointer;
+  }
+  .private-btn.selected{ background:var(--accent-deep); color:#fff; border-color:var(--accent-deep); }
+  .private-btn:focus-visible{ outline:3px solid var(--ring); outline-offset:2px; }
+  .private-response{
+    font-size:12.5px; color:var(--accent-deep); font-weight:600; margin-top:10px; min-height:16px;
+    opacity:0; transition:opacity .4s ease;
+  }
+  .private-response.show{ opacity:1; }
+
+  /* ---------- bin ---------- */
+  .bin-row{ display:flex; flex-direction: column; align-items: center; margin: 4px 0 6px; }
+  .bin{ width: 70px; height: 60px; position: relative; }
+  .bin svg{ width: 100%; height: 100%; overflow: visible; }
+  .bin.bounce{ animation: bounce .45s ease; }
+  @keyframes bounce{
+    0%{ transform: scale(1); } 35%{ transform: scale(1.14, 0.88); }
+    60%{ transform: scale(0.94, 1.08); } 100%{ transform: scale(1); }
+  }
+  .particle{
+    position: absolute; width: 5px; height: 5px; border-radius: 50%; background: var(--accent-light);
+    top: 50%; left: 50%; pointer-events: none; animation: burst .6s ease-out forwards;
+  }
+  @keyframes burst{ to{ transform: translate(var(--px), var(--py)) scale(0); opacity: 0; } }
+
+  .affirm{
+    text-align:center; font-size: 14px; color: var(--accent-deep); font-weight: 600; line-height: 1.6;
+    min-height: 40px; display:flex; align-items:center; justify-content:center; padding: 0 8px;
+    opacity: 0; transition: opacity .5s ease;
+  }
+  .affirm.show{ opacity: 1; }
+
+  .delta-text{ text-align:center; font-size:14px; color:var(--ink-soft); margin: 2px 0 20px; line-height:1.6; }
+  .delta-text b{ color:var(--accent-deep); }
+
+  /* ---------- breathing ---------- */
+  .breathe-wrap{ display:flex; flex-direction:column; align-items:center; padding: 14px 0 8px; }
+  .breathe-circle{
+    width:110px; height:110px; border-radius:50%;
+    background: radial-gradient(circle at 35% 32%, var(--accent-light), var(--accent-deep));
+    animation: breathe 8s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{ transform:scale(0.72); opacity:0.8; } 50%{ transform:scale(1.12); opacity:1; }
+  }
+  .breathe-text{ margin-top:18px; font-size:15px; font-weight:700; color:var(--accent-deep); min-height:22px; }
+  .breathe-sub{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; }
+
+  @media (prefers-reduced-motion: reduce){
+    .note.crumple, .note.toss, .bin.bounce, .shake, .shake-x, .particle, .breathe-circle{
+      animation: none !important; transition: opacity .2s ease !important;
+    }
+    .note.toss{ opacity: 0; }
+    .breathe-circle{ opacity: 0.9; }
+  }
+
+  /* ---------- community map ---------- */
+  .map-bar-row{ display:flex; align-items:center; gap:10px; margin-bottom:11px; }
+  .map-label{ width:60px; font-size:13px; color:var(--ink-soft); flex-shrink:0; }
+  .map-track{ flex:1; background:var(--paper-deep); border-radius:8px; height:16px; overflow:hidden; display:block; }
+  .map-fill{ height:100%; background: linear-gradient(90deg, var(--accent-light), var(--accent-deep)); border-radius:8px; transition:width .6s ease; width:0%; display:block; }
+  .map-count{ width:24px; text-align:right; font-size:12px; color:var(--ink-soft); flex-shrink:0; }
+  .map-empty{ text-align:center; font-size:13.5px; color:var(--ink-soft); padding: 10px 0 4px; }
+
+  /* ---------- presentation mode ---------- */
+  .present-code{
+    text-align:center; font-size: clamp(36px, 8vw, 52px); font-weight: 900;
+    letter-spacing: 0.22em; color: var(--accent-deep); margin: 2px 0 14px;
+    text-indent: 0.22em; /* balance letter-spacing */
+  }
+  .present-qr{ display:flex; justify-content:center; margin-bottom: 18px; }
+  .present-qr svg, .present-qr img{
+    width: 150px; height: 150px; background: #fff; padding: 10px; border-radius: 14px;
+    border: 1px solid rgba(34,50,38,0.1);
+  }
+  .present-qr-note{ text-align:center; font-size:12px; color:var(--ink-soft); margin: -8px 0 16px; }
+  #present-map .map-label{ width: 82px; font-size: 16px; font-weight: 600; }
+  #present-map .map-track{ height: 24px; border-radius: 10px; }
+  #present-map .map-fill{ border-radius: 10px; }
+  #present-map .map-count{ width: 32px; font-size: 15px; font-weight: 700; color: var(--accent-deep); }
+  .present-total{ text-align:center; font-size: 14px; color: var(--ink-soft); margin: 16px 0 4px; }
+  .present-total b{ font-size: 22px; color: var(--accent-deep); }
+  .present-status{ text-align:center; font-size: 12px; color: var(--ink-soft); min-height: 16px; margin: 0 0 10px; }
+  .present-status.warn{ color: var(--caution); font-weight: 600; }
+
+  /* ---------- closing ---------- */
+  .closing p{ text-align:center; font-size: 15px; line-height: 1.75; color: var(--ink); margin: 0 0 10px; }
+  .closing .sub{ font-size: 13px; color: var(--ink-soft); }
+  .closing .total{ text-align:center; font-size: 13px; color: var(--ink-soft); margin: 16px 0 6px; }
+  .closing .total b{ color: var(--accent-deep); font-size: 15px; }
+  .coping-summary{ margin: 14px 0 22px; }
+  .coping-summary p{ text-align:center; font-size:12.5px; color:var(--ink-soft); margin:0 0 8px; }
+  .coping-chips{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+  .coping-chips .chip{ cursor:default; font-size:12.5px; padding:6px 12px; }
+  .coping-chips .chip:hover{ border-color: rgba(45,107,74,0.22); }
+
+  /* ---------- teacher note ---------- */
+  .teacher-toggle{
+    display:block; margin: 18px auto 0; background: none; border: none; font-size: 11px;
+    color: var(--ink-soft); opacity: 0.4; cursor: pointer; font-family: inherit;
+  }
+  .teacher-toggle:hover{ opacity: 0.75; }
+  .teacher-panel{
+    max-width: 560px; margin: 10px auto 0; background: rgba(45,107,74,0.06);
+    border: 1px dashed rgba(45,107,74,0.3); border-radius: 12px; padding: 14px 16px;
+    font-size: 12.5px; line-height: 1.7; color: var(--ink-soft); display: none;
+  }
+  .teacher-panel.show{ display: block; }
+  .teacher-panel b{ color: var(--accent-deep); }
+
+  @media (max-width: 400px){ .stage{ border-radius: 16px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- STAGE 1: 안내 -->
+  <div class="stage" id="stage-intro">
+    <div class="mark">
+      <svg viewBox="0 0 44 40" fill="none" aria-hidden="true">
+        <path d="M27 4C20 4 16 10 16 15c0 9 12 17 12 17s12-8 12-17c0-5-4-11-11-11-1.8 0-3.6.6-5 1.7" fill="#2D6B4A" opacity="0.9"/>
+        <path d="M17 8C10 8 6 14 6 19c0 9 12 17 12 17s3-2 6-5C17 26 12 20 12 15c0-3 1.6-6 4-8-2 0-3 0-4 1" fill="#7BC67E"/>
+      </svg>
+    </div>
+    <p class="eyebrow">Lev Lab · 마음이 배움의 중심이 되는 시간</p>
+    <h1>감정, 안전하게<br>내려놓기</h1>
+    <div class="caution">
+      <p>우리는 가끔 속상한 마음을 친구에게 쏟아버리곤 해요.</p>
+      <p><strong>하지만 친구는 내 감정쓰레기통이 아니에요.</strong></p>
+    </div>
+    <p class="lead">오늘은 그 대신, 이 안전한 공간에 내 마음을 잠깐 내려놓고 가볼게요.</p>
+
+    <div class="code-row">
+      <label for="class-code">교실 코드</label>
+      <input id="class-code" class="code-input" maxlength="6" autocomplete="off" spellcheck="false" placeholder="없어도 돼요">
+    </div>
+    <p class="code-hint" id="code-hint">선생님이 알려준 코드를 넣으면 우리 반 마음 날씨에 함께 모여요</p>
+
+    <button class="btn btn-primary" id="btn-start">시작하기</button>
+  </div>
+
+  <!-- STAGE 2: 활동 -->
+  <div class="stage hidden" id="stage-activity">
+
+    <p class="round-tag" id="round-tag">1라운드</p>
+    <div class="progress-dots" id="progress-dots">
+      <div class="dot" data-step="0"></div>
+      <div class="dot" data-step="1"></div>
+      <div class="dot" data-step="2"></div>
+      <div class="dot" data-step="3"></div>
+    </div>
+
+    <!-- SUBVIEW A: 담아보기 -->
+    <div class="subview" id="view-capture">
+      <p class="prompt">지금 드는 감정에 가까운 걸 골라보세요</p>
+      <div class="chip-row" id="emotion-chips">
+        <button class="chip" data-emotion="화남">화남</button>
+        <button class="chip" data-emotion="서운함">서운함</button>
+        <button class="chip" data-emotion="억울함">억울함</button>
+        <button class="chip" data-emotion="답답함">답답함</button>
+        <button class="chip" data-emotion="부끄러움">부끄러움</button>
+        <button class="chip" data-emotion="불안">불안</button>
+      </div>
+
+      <div class="slider-block">
+        <div class="slider-label">
+          <span>지금 이 감정, 얼마나 세요?</span>
+          <span class="slider-value" id="pre-value">5</span>
+        </div>
+        <input type="range" id="pre-slider" min="1" max="10" value="5">
+      </div>
+
+      <p class="prompt-sub" style="margin-top:-6px; margin-bottom:10px; text-align:left;">조금 더 적어보고 싶다면 (쓴 내용은 저장되지 않아요)</p>
+      <div class="note-zone">
+        <div class="note" id="note">
+          <label for="ta" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">감정 적기</label>
+          <textarea id="ta" placeholder="오늘 있었던 일을 자유롭게 적어보세요… (선택)" maxlength="240"></textarea>
+        </div>
+      </div>
+
+      <div class="private-check">
+        <p>혹시 방금, 이 감정을 누군가에게 쏟아버릴 뻔했나요?</p>
+        <div class="private-btns">
+          <button class="private-btn" id="private-no" data-val="아니요">아니요</button>
+          <button class="private-btn" id="private-yes" data-val="네">네</button>
+        </div>
+        <p class="private-response" id="private-response"></p>
+      </div>
+
+      <button class="btn btn-primary" id="btn-toss" disabled>구겨서 버리기</button>
+
+      <div class="bin-row">
+        <div class="bin" id="bin">
+          <svg viewBox="0 0 70 62" fill="none" aria-hidden="true">
+            <rect x="6" y="34" width="4" height="20" rx="2" fill="#A78A6D" transform="rotate(-8 8 44)"/>
+            <path d="M14 20h42l-5 34a5 5 0 0 1-5 4.5H24a5 5 0 0 1-5-4.5L14 20z" fill="#2D6B4A"/>
+            <path d="M14 20h42l-1.2 8H15.2L14 20z" fill="#7BC67E"/>
+            <rect x="10" y="12" width="50" height="8" rx="3" fill="#2D6B4A"/>
+            <rect x="27" y="4" width="16" height="8" rx="3" fill="#2D6B4A"/>
+          </svg>
+        </div>
+        <p class="affirm" id="affirm" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <!-- SUBVIEW B: 내려놓은 뒤 -->
+    <div class="subview hidden" id="view-release">
+      <p class="prompt">지금은 얼마나 세요?</p>
+      <p class="prompt-sub">방금 내려놓은 그 감정, 다시 한번 느껴보세요</p>
+      <div class="slider-block">
+        <div class="slider-label">
+          <span>지금 느껴지는 정도</span>
+          <span class="slider-value" id="post-value">5</span>
+        </div>
+        <input type="range" id="post-slider" min="1" max="10" value="5">
+      </div>
+      <p class="delta-text" id="delta-text"></p>
+
+      <p class="prompt" style="margin-top:6px;">다음엔 이렇게 해볼래요</p>
+      <div class="chip-row" id="coping-chips">
+        <button class="chip" data-coping="심호흡하기">심호흡하기</button>
+        <button class="chip" data-coping="잠깐 걷기">잠깐 걷기</button>
+        <button class="chip" data-coping="일기 쓰기">일기 쓰기</button>
+        <button class="chip" data-coping="믿을 수 있는 사람에게 말하기">믿을 수 있는 사람에게 말하기</button>
+      </div>
+
+      <button class="btn btn-primary" id="btn-to-breathe" disabled>다음</button>
+    </div>
+
+    <!-- SUBVIEW C: 잠깐 숨 고르기 -->
+    <div class="subview hidden" id="view-breathe">
+      <p class="prompt">잠깐 숨을 골라볼게요</p>
+      <div class="breathe-wrap">
+        <div class="breathe-circle"></div>
+        <p class="breathe-text" id="breathe-text">들이쉬고…</p>
+        <p class="breathe-sub">천천히, 자기 속도대로 하면 돼요</p>
+      </div>
+      <div class="btn-quiet-wrap">
+        <button class="btn btn-ghost" id="btn-skip-breathe">건너뛰기</button>
+      </div>
+    </div>
+
+    <!-- SUBVIEW D: 계속할까요 -->
+    <div class="subview hidden" id="view-continue">
+      <p class="prompt" style="margin-bottom:22px;">한 번 더 내려놓아볼까요?</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-again">네, 한 번 더</button>
+        <button class="btn btn-secondary" id="btn-stop">여기까지 할래요</button>
+      </div>
+    </div>
+
+    <!-- SUBVIEW E: 우리 반 마음 날씨 -->
+    <div class="subview hidden" id="view-map">
+      <p class="prompt">오늘 우리 반 마음 날씨</p>
+      <p class="prompt-sub" id="map-sub">이름은 보이지 않아요 — 우리 반이 함께 느낀 감정이에요</p>
+      <div id="map-body"></div>
+      <button class="btn btn-primary" id="btn-to-closing" style="margin-top:8px;">다음</button>
+    </div>
+
+  </div>
+
+  <!-- STAGE 3: 마무리 -->
+  <div class="stage hidden" id="stage-closing">
+    <p class="eyebrow" style="margin-bottom:16px;">마무리</p>
+    <div class="closing">
+      <p>오늘 내가 감정을 안전하게 내려놓은 것처럼,<br>친구의 감정도 함부로 받지도, 아무 데나 쏟지도 않기로 해요.</p>
+      <p class="sub">혼자 감당하기 어려운 마음이 있다면, 선생님이나 상담선생님께 이야기해도 좋아요.</p>
+    </div>
+
+    <div class="coping-summary" id="coping-summary">
+      <p>오늘 내가 골라본 대처법</p>
+      <div class="coping-chips" id="coping-summary-chips"></div>
+    </div>
+
+    <p class="total" id="closing-total">오늘 우리 반이 함께 내려놓은 감정 · <b id="total-count">–</b>개</p>
+    <button class="btn btn-primary" id="btn-restart">다시 시작하기</button>
+  </div>
+
+  <!-- STAGE 4: 교사 발표 모드 -->
+  <div class="stage hidden" id="stage-present">
+    <p class="eyebrow">Lev Lab · 발표 모드</p>
+    <h1>오늘 우리 반 마음 날씨</h1>
+
+    <div class="subview" id="present-setup">
+      <p class="prompt">교실 코드를 만들었어요</p>
+      <p class="prompt-sub">그대로 쓰거나, 원하는 코드로 바꿔도 돼요 (영문·숫자 4~6자)</p>
+      <div class="code-row">
+        <input id="present-code-input" class="code-input" maxlength="6" autocomplete="off" spellcheck="false">
+      </div>
+      <p class="code-hint" id="present-code-hint"></p>
+      <button class="btn btn-primary" id="btn-present-start">이 코드로 시작하기</button>
+      <div class="btn-quiet-wrap">
+        <button class="btn btn-ghost" id="btn-present-back">돌아가기</button>
+      </div>
+    </div>
+
+    <div class="subview hidden" id="present-live">
+      <p class="present-code" id="present-code"></p>
+      <div class="present-qr" id="present-qr"></div>
+      <p class="present-qr-note" id="present-qr-note">휴대폰 카메라로 QR을 찍으면 바로 참여할 수 있어요</p>
+      <div id="present-map"></div>
+      <p class="present-total">함께 내려놓은 감정 · <b id="present-total">0</b>개</p>
+      <p class="present-status" id="present-status"></p>
+      <button class="btn btn-secondary" id="btn-present-exit">발표 모드 종료</button>
+    </div>
+  </div>
+
+  <button class="teacher-toggle" id="teacher-toggle">교사용 안내</button>
+  <div class="teacher-panel" id="teacher-panel">
+    <b>진행 팁</b><br>
+    · 활동 전: "쓰레기를 아무 데나 버리면?" 질문으로 도입하면 자연스럽게 연결돼요.<br>
+    · 학생이 쓴 텍스트는 저장·전송되지 않고 브라우저 안에서만 사라집니다. 비공개 체크(예/아니요)도 그 누구에게도(교사 포함) 보이지 않아요 — 반으로 모이는 것은 <b>감정 종류별 개수와 횟수뿐</b>입니다.<br>
+    · <b>교실 코드</b>: 아래 발표 모드를 열면 코드와 QR이 생겨요. 학생들이 같은 코드로 들어오면 "우리 반 마음 날씨"가 실시간으로 모입니다. 코드 없이 하면 각자 기기에만 기록돼요(활동은 동일하게 진행 가능).<br>
+    · 라운드는 최대 3회까지 진행되며, 학생이 원하면 1회만 하고 넘어가도 무방합니다.<br>
+    · 마무리 후 확장: "오늘 버린 감정 중 사실은 배움이 되는 감정도 있었을까?" (재활용/일반/유해 감정 분류로 다음 차시 연결 가능)
+    <button class="btn btn-secondary" id="btn-open-present" style="margin-top:12px;">발표 모드 열기 — 우리 반 실시간 화면</button>
+  </div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script>
+(function(){
+  // ──────────────────────────────────────────────
+  // Firebase (없거나 실패하면 로컬 모드로 자동 전환)
+  // ──────────────────────────────────────────────
+  const FIREBASE_CONFIG = {
+    apiKey:            "AIzaSyBc-66tIeGrGskzA_RJsEjFu_lPv925cBk",
+    authDomain:        "lev-diary.firebaseapp.com",
+    projectId:         "lev-diary",
+    storageBucket:     "lev-diary.firebasestorage.app",
+    messagingSenderId: "790116212067",
+    appId:             "1:790116212067:web:97bf5cdc3bb624737b8756"
+  };
+  const COLLECTION = 'emotion_release';
+
+  let db = null;
+  try{
+    if(window.firebase && firebase.initializeApp){
+      firebase.initializeApp(FIREBASE_CONFIG);
+      db = firebase.firestore();
+    }
+  }catch(e){ db = null; }
+
+  // ──────────────────────────────────────────────
+  // DOM refs
+  // ──────────────────────────────────────────────
+  const introStage = document.getElementById('stage-intro');
+  const activityStage = document.getElementById('stage-activity');
+  const closingStage = document.getElementById('stage-closing');
+  const presentStage = document.getElementById('stage-present');
+
+  const btnStart = document.getElementById('btn-start');
+  const btnRestart = document.getElementById('btn-restart');
+  const codeInput = document.getElementById('class-code');
+  const codeHint = document.getElementById('code-hint');
+  const CODE_HINT_DEFAULT = codeHint.textContent;
+
+  const viewCapture = document.getElementById('view-capture');
+  const viewRelease = document.getElementById('view-release');
+  const viewBreathe = document.getElementById('view-breathe');
+  const viewContinue = document.getElementById('view-continue');
+  const viewMap = document.getElementById('view-map');
+  const views = [viewCapture, viewRelease, viewBreathe, viewContinue, viewMap];
+  const dots = Array.from(document.querySelectorAll('#progress-dots .dot'));
+  const roundTag = document.getElementById('round-tag');
+
+  const emotionChips = Array.from(document.querySelectorAll('#emotion-chips .chip'));
+  const preSlider = document.getElementById('pre-slider');
+  const preValue = document.getElementById('pre-value');
+  const note = document.getElementById('note');
+  const ta = document.getElementById('ta');
+  const bin = document.getElementById('bin');
+  const affirmEl = document.getElementById('affirm');
+
+  const privateNo = document.getElementById('private-no');
+  const privateYes = document.getElementById('private-yes');
+  const privateResponse = document.getElementById('private-response');
+  const btnToss = document.getElementById('btn-toss');
+
+  const postSlider = document.getElementById('post-slider');
+  const postValue = document.getElementById('post-value');
+  const deltaText = document.getElementById('delta-text');
+  const copingChips = Array.from(document.querySelectorAll('#coping-chips .chip'));
+  const btnToBreathe = document.getElementById('btn-to-breathe');
+
+  const breatheText = document.getElementById('breathe-text');
+  const btnSkipBreathe = document.getElementById('btn-skip-breathe');
+
+  const btnAgain = document.getElementById('btn-again');
+  const btnStop = document.getElementById('btn-stop');
+
+  const mapBody = document.getElementById('map-body');
+  const mapSub = document.getElementById('map-sub');
+  const btnToClosing = document.getElementById('btn-to-closing');
+
+  const copingSummaryChips = document.getElementById('coping-summary-chips');
+  const totalCountEl = document.getElementById('total-count');
+  const closingTotal = document.getElementById('closing-total');
+
+  const teacherToggle = document.getElementById('teacher-toggle');
+  const teacherPanel = document.getElementById('teacher-panel');
+
+  const btnOpenPresent = document.getElementById('btn-open-present');
+  const presentSetup = document.getElementById('present-setup');
+  const presentLive = document.getElementById('present-live');
+  const presentCodeInput = document.getElementById('present-code-input');
+  const presentCodeHint = document.getElementById('present-code-hint');
+  const btnPresentStart = document.getElementById('btn-present-start');
+  const btnPresentBack = document.getElementById('btn-present-back');
+  const presentCodeEl = document.getElementById('present-code');
+  const presentQr = document.getElementById('present-qr');
+  const presentQrNote = document.getElementById('present-qr-note');
+  const presentMap = document.getElementById('present-map');
+  const presentTotal = document.getElementById('present-total');
+  const presentStatus = document.getElementById('present-status');
+  const btnPresentExit = document.getElementById('btn-present-exit');
+
+  // ──────────────────────────────────────────────
+  // 상태
+  // ──────────────────────────────────────────────
+  const MAX_ROUNDS = 3;
+  const EMOTIONS = ["화남","서운함","억울함","답답함","부끄러움","불안"];
+  const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 헷갈리는 0/O, 1/I 제외
+
+  const affirmations = [
+    "감정은 사라지지 않지만, 오늘은 내려놓아도 괜찮아요.",
+    "여기까지 적는 데도 용기가 필요했어요.",
+    "마음속 짐 하나, 잘 내려놓았어요.",
+    "다 괜찮아지지 않아도, 오늘은 여기까지.",
+    "필요하면 나중에 다시 꺼내 봐도 괜찮아요.",
+    "이 마음을 나눌 사람이 있다면, 오늘 한마디 건네보는 것도 좋아요.",
+    "당신의 마음도, 친구의 마음도 함부로 다뤄지지 않을 자격이 있어요."
+  ];
+
+  let round = 1;
+  let totalCount = 0;
+  let allCoping = [];
+  let current = { emotion: null, pre: 5, dumped: null, post: 5, coping: null };
+  let breatheTimer = null;
+
+  let classCode = null;        // 학생이 입력한 교실 코드 (없으면 로컬 모드)
+  let presentUnsub = null;     // 발표 모드 실시간 구독 해제 함수
+
+  // 한국 시간(기기 로컬 시간) 기준 날짜 키 — toISOString()은 UTC라 오전 9시 이전 수업이 어제로 기록되는 버그가 있었음
+  function localDateKey(){
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  const dateKey = localDateKey();
+  const localMapKey = 'emotion_release_local_map_' + dateKey;
+  const localCountKey = 'emotion_release_local_count_' + dateKey;
+
+  function docRef(code){
+    return db.collection(COLLECTION).doc(dateKey + '_' + code);
+  }
+
+  function sanitizeCode(raw){
+    return (raw || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+  }
+
+  function genCode(){
+    let s = '';
+    for(let i = 0; i < 4; i++) s += CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)];
+    return s;
+  }
+
+  // URL ?code=XXXX 로 들어오면 자동 입력 (QR 스캔 경로)
+  const urlCode = sanitizeCode(new URLSearchParams(location.search).get('code'));
+  if(urlCode.length >= 4){
+    codeInput.value = urlCode;
+    codeHint.textContent = '교실 코드가 자동으로 입력됐어요';
+  }
+
+  // ──────────────────────────────────────────────
+  // 로컬 집계 (코드 없이 쓰거나 네트워크가 없을 때의 안전망)
+  // ──────────────────────────────────────────────
+  let localTotal = 0;
+  try{ localTotal = parseInt(localStorage.getItem(localCountKey) || '0', 10) || 0; }catch(e){}
+
+  function localBump(emotion){
+    localTotal += 1;
+    try{
+      const m = JSON.parse(localStorage.getItem(localMapKey) || '{}');
+      m[emotion] = (m[emotion] || 0) + 1;
+      localStorage.setItem(localMapKey, JSON.stringify(m));
+      localStorage.setItem(localCountKey, String(localTotal));
+    }catch(e){}
+  }
+
+  function readLocalMap(){
+    try{ return JSON.parse(localStorage.getItem(localMapKey) || '{}'); }catch(e){ return {}; }
+  }
+
+  // Firestore 원자적 증가 — 여러 학생이 동시에 버려도 정확히 합산됨
+  function sharedBump(emotion){
+    if(!db || !classCode || !emotion) return;
+    try{
+      const inc = firebase.firestore.FieldValue.increment;
+      docRef(classCode).set({
+        total: inc(1),
+        counts: { [emotion]: inc(1) },
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true }).catch(function(){ /* 공유 집계는 보너스 — 조용히 로컬로 유지 */ });
+    }catch(e){}
+  }
+
+  // ──────────────────────────────────────────────
+  // 화면 전환
+  // ──────────────────────────────────────────────
+  function showStage(stage){
+    [introStage, activityStage, closingStage, presentStage].forEach(s => s.classList.add('hidden'));
+    stage.classList.remove('hidden');
+  }
+
+  function showView(view){
+    views.forEach(v => v.classList.add('hidden'));
+    view.classList.remove('hidden');
+    const idx = views.indexOf(view);
+    dots.forEach((d, i) => {
+      d.classList.toggle('active', i === idx && idx < 4);
+      d.classList.toggle('done', idx >= 4 || i < idx); // 마음 날씨 화면에서는 전부 완료 표시
+    });
+  }
+
+  function resetRoundUI(){
+    emotionChips.forEach(c => c.classList.remove('selected'));
+    current.emotion = null;
+    preSlider.value = 5;
+    preValue.textContent = '5';
+    current.pre = 5;
+    ta.value = '';
+    privateNo.classList.remove('selected');
+    privateYes.classList.remove('selected');
+    privateResponse.classList.remove('show');
+    privateResponse.textContent = '';
+    current.dumped = null;
+    btnToss.disabled = true;
+    affirmEl.classList.remove('show');
+    postSlider.value = 5;
+    postValue.textContent = '5';
+    copingChips.forEach(c => c.classList.remove('selected'));
+    current.coping = null;
+    btnToBreathe.disabled = true;
+    roundTag.textContent = round + '라운드' + (round === MAX_ROUNDS ? ' (마지막)' : '');
+  }
+
+  btnStart.addEventListener('click', () => {
+    const raw = sanitizeCode(codeInput.value);
+    if(codeInput.value.trim() && raw.length < 4){
+      codeHint.textContent = '코드는 영문·숫자 4~6자예요 — 비워두고 시작해도 괜찮아요';
+      codeHint.classList.add('warn');
+      codeInput.classList.remove('shake-x');
+      void codeInput.offsetWidth;
+      codeInput.classList.add('shake-x');
+      return;
+    }
+    codeHint.classList.remove('warn');
+    codeHint.textContent = CODE_HINT_DEFAULT;
+    classCode = raw.length >= 4 ? raw : null;
+    showStage(activityStage);
+    resetRoundUI();
+    showView(viewCapture);
+  });
+
+  function updateTossEnabled(){
+    btnToss.disabled = !(current.emotion && current.dumped !== null);
+  }
+
+  emotionChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      emotionChips.forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      current.emotion = chip.dataset.emotion;
+      updateTossEnabled();
+    });
+  });
+
+  preSlider.addEventListener('input', () => {
+    preValue.textContent = preSlider.value;
+    current.pre = parseInt(preSlider.value, 10);
+  });
+
+  function setPrivate(val, btn){
+    current.dumped = val;
+    privateNo.classList.toggle('selected', btn === privateNo);
+    privateYes.classList.toggle('selected', btn === privateYes);
+    privateResponse.textContent = (val === '네')
+      ? '알아차린 것만으로 충분해요.'
+      : '좋아요, 그대로 마음에 담아볼게요.';
+    privateResponse.classList.add('show');
+    updateTossEnabled();
+  }
+  privateNo.addEventListener('click', () => setPrivate('아니요', privateNo));
+  privateYes.addEventListener('click', () => setPrivate('네', privateYes));
+
+  btnToss.addEventListener('click', () => {
+    const noteRect = note.getBoundingClientRect();
+    const binRect = bin.getBoundingClientRect();
+    const tx = (binRect.left + binRect.width/2) - (noteRect.left + noteRect.width/2);
+    const ty = (binRect.top + binRect.height/2) - (noteRect.top + noteRect.height/2);
+    note.style.setProperty('--tx', tx + 'px');
+    note.style.setProperty('--ty', ty + 'px');
+
+    btnToss.disabled = true;
+    note.classList.add('crumple');
+
+    setTimeout(() => {
+      note.classList.remove('crumple');
+      note.classList.add('toss');
+    }, 380);
+
+    setTimeout(() => {
+      note.classList.add('hide');
+      bin.classList.add('bounce');
+      spawnParticles();
+
+      const line = affirmations[Math.floor(Math.random() * affirmations.length)];
+      affirmEl.textContent = line;
+      affirmEl.classList.remove('show');
+      void affirmEl.offsetWidth;
+      affirmEl.classList.add('show');
+
+      localBump(current.emotion);
+      sharedBump(current.emotion);
+
+      setTimeout(() => {
+        note.classList.remove('hide', 'toss');
+        bin.classList.remove('bounce');
+        postSlider.value = current.pre;
+        postValue.textContent = current.pre;
+        deltaText.textContent = '';
+        showView(viewRelease);
+      }, 900);
+    }, 380 + 550);
+  });
+
+  function spawnParticles(){
+    for(let i = 0; i < 7; i++){
+      const p = document.createElement('span');
+      p.className = 'particle';
+      const angle = (Math.PI * 2 / 7) * i + Math.random() * 0.4;
+      const dist = 24 + Math.random() * 16;
+      p.style.setProperty('--px', Math.cos(angle) * dist + 'px');
+      p.style.setProperty('--py', Math.sin(angle) * dist - 12 + 'px');
+      bin.appendChild(p);
+      setTimeout(() => p.remove(), 650);
+    }
+  }
+
+  postSlider.addEventListener('input', () => {
+    postValue.textContent = postSlider.value;
+    current.post = parseInt(postSlider.value, 10);
+    const delta = current.pre - current.post;
+    if(delta > 0){
+      deltaText.innerHTML = current.pre + ' → <b>' + current.post + '</b>로 내려갔어요.';
+    } else if(delta === 0){
+      deltaText.textContent = '그대로여도 괜찮아요. 여기까지 온 것도 큰 걸음이에요.';
+    } else {
+      deltaText.textContent = '지금은 오히려 더 세게 느껴질 수도 있어요. 그것도 자연스러운 거예요.';
+    }
+  });
+  // 화면이 보일 때 한 번 초기화
+  const releaseObserver = new MutationObserver(() => {
+    if(!viewRelease.classList.contains('hidden')){
+      postSlider.dispatchEvent(new Event('input'));
+    }
+  });
+  releaseObserver.observe(viewRelease, { attributes: true, attributeFilter: ['class'] });
+
+  copingChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      copingChips.forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      current.coping = chip.dataset.coping;
+      btnToBreathe.disabled = false;
+    });
+  });
+
+  const breatheLines = ['들이쉬고…', '내쉬고…'];
+  let breatheIdx = 0;
+  let breatheCyclesLeft = 2;
+
+  function runBreatheCycle(){
+    breatheText.textContent = breatheLines[breatheIdx % 2];
+    breatheIdx++;
+    if(breatheIdx % 2 === 0){
+      breatheCyclesLeft--;
+    }
+    if(breatheCyclesLeft <= 0){
+      clearInterval(breatheTimer);
+      goToContinue();
+      return;
+    }
+  }
+
+  function startBreathe(){
+    breatheIdx = 0;
+    breatheCyclesLeft = 2;
+    breatheText.textContent = breatheLines[0];
+    breatheIdx = 1;
+    clearInterval(breatheTimer);
+    breatheTimer = setInterval(runBreatheCycle, 4000);
+  }
+
+  function stopBreathe(){
+    clearInterval(breatheTimer);
+  }
+
+  btnToBreathe.addEventListener('click', () => {
+    if(current.coping) allCoping.push(current.coping);
+    showView(viewBreathe);
+    startBreathe();
+  });
+
+  btnSkipBreathe.addEventListener('click', () => {
+    stopBreathe();
+    goToContinue();
+  });
+
+  function goToContinue(){
+    showView(viewContinue);
+    if(round >= MAX_ROUNDS){
+      btnAgain.style.display = 'none';
+      viewContinue.querySelector('.prompt').textContent = '오늘은 충분히 많이 내려놨어요';
+      setTimeout(() => goToMap(), 900);
+    } else {
+      btnAgain.style.display = '';
+      viewContinue.querySelector('.prompt').textContent = '한 번 더 내려놓아볼까요?';
+    }
+  }
+
+  btnAgain.addEventListener('click', () => {
+    round++;
+    resetRoundUI();
+    showView(viewCapture);
+  });
+
+  btnStop.addEventListener('click', () => { goToMap(); });
+
+  // ──────────────────────────────────────────────
+  // 마음 날씨 (교실 코드 있으면 반 전체, 없으면 이 기기)
+  // ──────────────────────────────────────────────
+  async function goToMap(){
+    showView(viewMap);
+    let map = null;
+
+    if(db && classCode){
+      try{
+        const snap = await docRef(classCode).get();
+        const data = snap.exists ? snap.data() : {};
+        map = (data && data.counts) || {};
+        totalCount = (data && data.total) || 0;
+        mapSub.textContent = '이름은 보이지 않아요 — 우리 반이 함께 느낀 감정이에요';
+      }catch(e){ map = null; }
+    }
+
+    if(map === null){
+      map = readLocalMap();
+      totalCount = localTotal;
+      mapSub.textContent = classCode
+        ? '지금은 연결이 어려워 이 기기의 기록만 보여요'
+        : '이 기기에서 오늘 내려놓은 감정이에요';
+    }
+
+    renderMap(map, mapBody, '아직 모인 기록이 없어요. 오늘 우리 반이 처음이에요.');
+  }
+
+  function renderMap(map, container, emptyText){
+    container.innerHTML = '';
+    const entries = EMOTIONS.map(e => [e, map[e] || 0]).filter(([,c]) => c > 0);
+    if(entries.length === 0){
+      const p = document.createElement('p');
+      p.className = 'map-empty';
+      p.textContent = emptyText;
+      container.appendChild(p);
+      return;
+    }
+    entries.sort((a,b) => b[1] - a[1]);
+    const max = entries[0][1];
+    entries.forEach(([label, count]) => {
+      const row = document.createElement('div');
+      row.className = 'map-bar-row';
+      row.innerHTML =
+        '<span class="map-label">' + label + '</span>' +
+        '<span class="map-track"><span class="map-fill" style="width:' + Math.round((count/max)*100) + '%"></span></span>' +
+        '<span class="map-count">' + count + '</span>';
+      container.appendChild(row);
+    });
+  }
+
+  btnToClosing.addEventListener('click', () => {
+    if(current.coping && !allCoping.includes(current.coping)) allCoping.push(current.coping);
+    renderClosing();
+    showStage(closingStage);
+  });
+
+  function renderClosing(){
+    copingSummaryChips.innerHTML = '';
+    const unique = Array.from(new Set(allCoping));
+    if(unique.length === 0){
+      document.getElementById('coping-summary').style.display = 'none';
+    } else {
+      document.getElementById('coping-summary').style.display = '';
+      unique.forEach(c => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = c;
+        copingSummaryChips.appendChild(chip);
+      });
+    }
+    closingTotal.firstChild.textContent = classCode
+      ? '오늘 우리 반이 함께 내려놓은 감정 · '
+      : '오늘 내가 내려놓은 감정 · ';
+    totalCountEl.textContent = totalCount || '–';
+  }
+
+  btnRestart.addEventListener('click', () => {
+    round = 1;
+    allCoping = [];
+    showStage(introStage);
+  });
+
+  teacherToggle.addEventListener('click', () => {
+    teacherPanel.classList.toggle('show');
+  });
+
+  // ──────────────────────────────────────────────
+  // 교사 발표 모드
+  // ──────────────────────────────────────────────
+  btnOpenPresent.addEventListener('click', () => {
+    presentCodeInput.value = urlCode.length >= 4 ? urlCode : genCode();
+    presentCodeHint.textContent = '';
+    presentSetup.classList.remove('hidden');
+    presentLive.classList.add('hidden');
+    showStage(presentStage);
+    teacherPanel.classList.remove('show');
+  });
+
+  btnPresentBack.addEventListener('click', () => { showStage(introStage); });
+
+  btnPresentStart.addEventListener('click', () => {
+    const code = sanitizeCode(presentCodeInput.value);
+    if(code.length < 4){
+      presentCodeHint.textContent = '코드는 영문·숫자 4~6자예요';
+      presentCodeHint.classList.add('warn');
+      presentCodeInput.classList.remove('shake-x');
+      void presentCodeInput.offsetWidth;
+      presentCodeInput.classList.add('shake-x');
+      return;
+    }
+    presentCodeHint.classList.remove('warn');
+    startPresentation(code);
+  });
+
+  function startPresentation(code){
+    presentSetup.classList.add('hidden');
+    presentLive.classList.remove('hidden');
+    presentCodeEl.textContent = code;
+    renderQr(code);
+    renderMap({}, presentMap, '아직 모인 마음이 없어요 — 첫 번째 마음을 기다리고 있어요');
+    presentTotal.textContent = '0';
+
+    if(!db){
+      presentStatus.textContent = '인터넷 연결을 확인해주세요 — 실시간 집계를 쓸 수 없어요';
+      presentStatus.classList.add('warn');
+      return;
+    }
+
+    presentStatus.classList.remove('warn');
+    presentStatus.textContent = '연결 중…';
+
+    if(presentUnsub) presentUnsub();
+    presentUnsub = docRef(code).onSnapshot(snap => {
+      const d = snap.exists ? snap.data() : {};
+      renderMap((d && d.counts) || {}, presentMap, '아직 모인 마음이 없어요 — 첫 번째 마음을 기다리고 있어요');
+      presentTotal.textContent = (d && d.total) || 0;
+      presentStatus.classList.remove('warn');
+      presentStatus.textContent = '실시간으로 모이고 있어요';
+    }, () => {
+      presentStatus.textContent = '연결에 문제가 있어요 — 인터넷 또는 Firebase 설정을 확인해주세요';
+      presentStatus.classList.add('warn');
+    });
+  }
+
+  function renderQr(code){
+    presentQr.innerHTML = '';
+    const isHosted = location.protocol === 'http:' || location.protocol === 'https:';
+    if(!isHosted || typeof qrcode !== 'function'){
+      presentQrNote.textContent = isHosted
+        ? '학생들에게 이 주소와 코드를 알려주세요: ' + location.href.split('?')[0]
+        : '파일로 직접 열면 QR을 만들 수 없어요 — 학생들에게 코드만 알려주세요';
+      return;
+    }
+    try{
+      const url = location.origin + location.pathname + '?code=' + code;
+      const qr = qrcode(0, 'M');
+      qr.addData(url);
+      qr.make();
+      presentQr.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+      presentQrNote.textContent = '휴대폰 카메라로 QR을 찍으면 바로 참여할 수 있어요';
+    }catch(e){
+      presentQrNote.textContent = '학생들에게 코드를 알려주세요: ' + code;
+    }
+  }
+
+  btnPresentExit.addEventListener('click', () => {
+    if(presentUnsub){ presentUnsub(); presentUnsub = null; }
+    showStage(introStage);
+  });
+})();
+</script>
+</body>
+</html>
