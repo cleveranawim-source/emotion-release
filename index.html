@@ -319,6 +319,18 @@
   .teacher-panel.show{ display: block; }
   .teacher-panel b{ color: var(--accent-deep); }
 
+  /* ---------- sound toggle ---------- */
+  .sound-toggle{
+    position: fixed; top: 14px; right: 14px; z-index: 50;
+    width: 42px; height: 42px; border-radius: 50%;
+    border: 1.5px solid rgba(45,107,74,0.25); background: var(--card);
+    font-size: 18px; line-height: 1; cursor: pointer; opacity: 0.7;
+    box-shadow: 0 2px 8px rgba(34,50,38,0.12);
+    transition: opacity .15s ease, transform .15s ease;
+  }
+  .sound-toggle:hover{ opacity: 1; transform: scale(1.06); }
+  .sound-toggle:focus-visible{ outline: 3px solid var(--ring); outline-offset: 2px; }
+
   @media (max-width: 420px){
     .stage{ border-radius: 18px; }
     .tile-grid{ grid-template-columns: repeat(2, 1fr); }
@@ -327,6 +339,8 @@
 </head>
 <body>
 <div class="wrap">
+
+  <button class="sound-toggle" id="sound-toggle" aria-label="효과음 켜기/끄기">🔊</button>
 
   <!-- STAGE 1: 안내 -->
   <div class="stage" id="stage-intro">
@@ -516,6 +530,9 @@
       <div id="present-map"></div>
       <p class="present-total">함께 내려놓은 감정 · <b id="present-total">0</b>개</p>
       <p class="present-status" id="present-status"></p>
+      <div class="btn-quiet-wrap">
+        <button class="btn btn-ghost" id="present-sound-toggle">🔕 새 마음 알림음: 꺼짐</button>
+      </div>
       <button class="btn btn-secondary" id="btn-present-exit">발표 모드 종료</button>
     </div>
   </div>
@@ -641,6 +658,9 @@
   const presentStatus = document.getElementById('present-status');
   const btnPresentExit = document.getElementById('btn-present-exit');
 
+  const soundToggle = document.getElementById('sound-toggle');
+  const presentSoundToggle = document.getElementById('present-sound-toggle');
+
   // ──────────────────────────────────────────────
   // 상태 · 데이터
   // ──────────────────────────────────────────────
@@ -754,6 +774,137 @@
       }, { merge: true }).catch(function(){ /* 공유 집계는 보너스 — 조용히 로컬로 유지 */ });
     }catch(e){}
   }
+
+  // ──────────────────────────────────────────────
+  // 효과음 (Web Audio 합성 — 음원 파일 없음, 저작권 무관)
+  // ──────────────────────────────────────────────
+  let audioCtx = null;
+  let soundOn = true;
+  try{ soundOn = localStorage.getItem('emotion_release_sound') !== 'off'; }catch(e){}
+  let presentSoundOn = false; // 발표 모드 알림음은 기본 꺼짐
+
+  function audio(){
+    try{
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }catch(e){ return null; }
+  }
+
+  function noiseBuffer(ac, dur){
+    const len = Math.max(1, Math.floor(ac.sampleRate * dur));
+    const buf = ac.createBuffer(1, len, ac.sampleRate);
+    const d = buf.getChannelData(0);
+    for(let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    return buf;
+  }
+
+  // 바스락바스락 — 하이패스 노이즈 버스트 여러 번 (구겨지기 애니메이션 0.38초에 맞춤)
+  function playCrumple(){
+    if(!soundOn) return;
+    const ac = audio(); if(!ac) return;
+    const now = ac.currentTime;
+    for(let i = 0; i < 7; i++){
+      const t0 = now + i * 0.05 + Math.random() * 0.02;
+      const src = ac.createBufferSource();
+      src.buffer = noiseBuffer(ac, 0.04);
+      const f = ac.createBiquadFilter();
+      f.type = 'bandpass';
+      f.frequency.value = 2500 + Math.random() * 3000;
+      f.Q.value = 0.8;
+      const g = ac.createGain();
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(0.10 + Math.random() * 0.07, t0 + 0.005);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.04);
+      src.connect(f); f.connect(g); g.connect(ac.destination);
+      src.start(t0); src.stop(t0 + 0.05);
+    }
+  }
+
+  // 휙 — 노이즈 주파수 스윕 (던지기 애니메이션 0.55초에 맞춤)
+  function playSwish(){
+    if(!soundOn) return;
+    const ac = audio(); if(!ac) return;
+    const now = ac.currentTime;
+    const src = ac.createBufferSource();
+    src.buffer = noiseBuffer(ac, 0.3);
+    const f = ac.createBiquadFilter();
+    f.type = 'bandpass'; f.Q.value = 1.5;
+    f.frequency.setValueAtTime(600, now);
+    f.frequency.exponentialRampToValueAtTime(3500, now + 0.25);
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.13, now + 0.06);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+    src.connect(f); f.connect(g); g.connect(ac.destination);
+    src.start(now); src.stop(now + 0.32);
+  }
+
+  // 통! — 낮은 사인 피치 드롭 + 종이 안착 노이즈
+  function playThunk(){
+    if(!soundOn) return;
+    const ac = audio(); if(!ac) return;
+    const now = ac.currentTime;
+    const o = ac.createOscillator();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(180, now);
+    o.frequency.exponentialRampToValueAtTime(70, now + 0.12);
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.28, now + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+    o.connect(g); g.connect(ac.destination);
+    o.start(now); o.stop(now + 0.2);
+
+    const src = ac.createBufferSource();
+    src.buffer = noiseBuffer(ac, 0.05);
+    const f = ac.createBiquadFilter();
+    f.type = 'lowpass'; f.frequency.value = 1200;
+    const g2 = ac.createGain();
+    g2.gain.setValueAtTime(0.13, now);
+    g2.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+    src.connect(f); f.connect(g2); g2.connect(ac.destination);
+    src.start(now); src.stop(now + 0.06);
+  }
+
+  // 퐁 — 부드러운 핑 (토글 확인음·발표 모드 알림음, 호출부에서 재생 여부 결정)
+  function playPop(vol){
+    const ac = audio(); if(!ac) return;
+    const now = ac.currentTime;
+    const o = ac.createOscillator();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(520, now);
+    o.frequency.exponentialRampToValueAtTime(780, now + 0.08);
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(vol || 0.1, now + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+    o.connect(g); g.connect(ac.destination);
+    o.start(now); o.stop(now + 0.4);
+  }
+
+  function updateSoundToggleUI(){
+    soundToggle.textContent = soundOn ? '🔊' : '🔇';
+    soundToggle.setAttribute('aria-label', soundOn ? '효과음 끄기' : '효과음 켜기');
+  }
+  updateSoundToggleUI();
+
+  soundToggle.addEventListener('click', () => {
+    soundOn = !soundOn;
+    try{ localStorage.setItem('emotion_release_sound', soundOn ? 'on' : 'off'); }catch(e){}
+    updateSoundToggleUI();
+    if(soundOn) playPop(0.07);
+  });
+
+  function updatePresentSoundUI(){
+    presentSoundToggle.textContent = presentSoundOn ? '🔔 새 마음 알림음: 켜짐' : '🔕 새 마음 알림음: 꺼짐';
+  }
+
+  presentSoundToggle.addEventListener('click', () => {
+    presentSoundOn = !presentSoundOn;
+    updatePresentSoundUI();
+    if(presentSoundOn) playPop(0.12);
+  });
 
   // ──────────────────────────────────────────────
   // 타일 만들기
@@ -883,16 +1034,19 @@
 
     btnToss.disabled = true;
     note.classList.add('crumple');
+    playCrumple();
 
     setTimeout(() => {
       note.classList.remove('crumple');
       note.classList.add('toss');
+      playSwish();
     }, 380);
 
     setTimeout(() => {
       note.classList.add('hide');
       bin.classList.add('bounce');
       spawnParticles();
+      playThunk();
 
       const line = affirmations[Math.floor(Math.random() * affirmations.length)];
       affirmEl.textContent = line;
@@ -1134,12 +1288,17 @@
 
     presentStatus.classList.remove('warn');
     presentStatus.textContent = '연결 중…';
+    updatePresentSoundUI();
 
+    let lastTotal = null;
     if(presentUnsub) presentUnsub();
     presentUnsub = docRef(code).onSnapshot(snap => {
       const d = snap.exists ? snap.data() : {};
+      const total = (d && d.total) || 0;
       renderMap((d && d.counts) || {}, presentMap, '아직 모인 마음이 없어요 — 첫 번째 마음을 기다리고 있어요');
-      presentTotal.textContent = (d && d.total) || 0;
+      presentTotal.textContent = total;
+      if(presentSoundOn && lastTotal !== null && total > lastTotal) playPop(0.12);
+      lastTotal = total;
       presentStatus.classList.remove('warn');
       presentStatus.textContent = '실시간으로 모이고 있어요';
     }, () => {
